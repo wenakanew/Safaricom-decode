@@ -1,18 +1,25 @@
-export type TransactionType = 'send' | 'receive' | 'paybill';
+export enum TransactionType {
+  INCOME = 'income',
+  EXPENSE = 'expense',
+  SEND = 'send',
+  RECEIVE = 'receive',
+  PAYBILL = 'paybill'
+}
 
 export interface Transaction {
   id?: string;
   uid: string;
   amount: number;
   type: TransactionType;
+  category: string;
   date: string;
-  description?: string;
-  createdAt: string;
+  description: string;
 }
 
 export interface CreditScore {
   uid: string;
   score: number;
+  rating: string;
   explanation: string;
   updatedAt: string;
 }
@@ -22,6 +29,7 @@ export interface Insight {
   totalIncome: number;
   totalExpenses: number;
   savingsPotential: number;
+  summary: string;
   message: string;
   updatedAt: string;
 }

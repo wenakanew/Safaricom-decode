@@ -19,16 +19,17 @@ service cloud.firestore {
     // Fields:
     //   - uid: string (required)
     //   - amount: number (required, positive)
-    //   - type: string (required, enum: send, receive, paybill)
+    //   - type: string (required, enum: income, expense, send, receive, paybill)
+    //   - category: string (required)
     //   - date: string (required, date-time)
-    //   - description: string (optional)
-    //   - createdAt: string (optional, date-time)
+    //   - description: string (required)
     //
     // Collection: credit_scores
     // Document ID: userId (uid)
     // Fields:
     //   - uid: string (required)
-    //   - score: number (required, 0-100)
+    //   - score: number (required, 0-1000)
+    //   - rating: string (required)
     //   - explanation: string (required)
     //   - updatedAt: string (required, date-time)
     //
@@ -39,6 +40,7 @@ service cloud.firestore {
     //   - totalIncome: number (required)
     //   - totalExpenses: number (required)
     //   - savingsPotential: number (optional)
+    //   - summary: string (optional)
     //   - message: string (optional)
     //   - updatedAt: string (required, date-time)
     //
@@ -87,13 +89,16 @@ service cloud.firestore {
     function isValidTransaction(data) {
       return data.uid is string && data.uid.size() > 0 &&
              data.amount is number && data.amount > 0 &&
-             data.type in ['send', 'receive', 'paybill'] &&
-             data.date is string;
+             data.type in ['income', 'expense', 'send', 'receive', 'paybill'] &&
+             data.category is string && data.category.size() > 0 &&
+             data.date is string &&
+             data.description is string;
     }
 
     function isValidCreditScore(data) {
       return data.uid is string && data.uid.size() > 0 &&
-             data.score is number && data.score >= 0 && data.score <= 100 &&
+             data.score is number && data.score >= 0 && data.score <= 1000 &&
+             data.rating is string &&
              data.explanation is string && data.explanation.size() < 1000;
     }
 

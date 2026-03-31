@@ -19,12 +19,16 @@
       "properties": {
         "uid": { "type": "string", "description": "The user ID who owns this transaction." },
         "amount": { "type": "number", "description": "The transaction amount." },
-        "type": { "type": "string", "enum": ["send", "receive", "paybill"], "description": "The type of transaction." },
+        "type": { 
+          "type": "string", 
+          "enum": ["income", "expense", "send", "receive", "paybill"], 
+          "description": "The type of transaction." 
+        },
+        "category": { "type": "string", "description": "The category of the transaction." },
         "date": { "type": "string", "format": "date-time", "description": "The date of the transaction." },
-        "description": { "type": "string", "description": "Optional description." },
-        "createdAt": { "type": "string", "format": "date-time", "description": "When the record was created." }
+        "description": { "type": "string", "description": "A brief description of the transaction." }
       },
-      "required": ["uid", "amount", "type", "date"]
+      "required": ["uid", "amount", "type", "category", "date", "description"]
     },
     "CreditScore": {
       "title": "Credit Score",
@@ -32,11 +36,12 @@
       "type": "object",
       "properties": {
         "uid": { "type": "string", "description": "The user ID." },
-        "score": { "type": "number", "description": "The score from 0 to 100." },
+        "score": { "type": "number", "description": "The score from 0 to 1000." },
+        "rating": { "type": "string", "description": "The credit rating (e.g., Excellent, Good, Fair)." },
         "explanation": { "type": "string", "description": "Explanation for the score." },
         "updatedAt": { "type": "string", "format": "date-time", "description": "When the score was last updated." }
       },
-      "required": ["uid", "score", "updatedAt"]
+      "required": ["uid", "score", "rating", "explanation", "updatedAt"]
     },
     "Insight": {
       "title": "Insight",
@@ -47,10 +52,11 @@
         "totalIncome": { "type": "number", "description": "Total income calculated." },
         "totalExpenses": { "type": "number", "description": "Total expenses calculated." },
         "savingsPotential": { "type": "number", "description": "Calculated savings potential." },
-        "message": { "type": "string", "description": "A summary message." },
+        "summary": { "type": "string", "description": "A short summary of the insights." },
+        "message": { "type": "string", "description": "A detailed insight message." },
         "updatedAt": { "type": "string", "format": "date-time", "description": "When the insight was last updated." }
       },
-      "required": ["uid", "totalIncome", "totalExpenses", "updatedAt"]
+      "required": ["uid", "totalIncome", "totalExpenses", "savingsPotential", "summary", "message", "updatedAt"]
     }
   },
   "firestore": {

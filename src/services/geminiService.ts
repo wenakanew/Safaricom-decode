@@ -1,5 +1,5 @@
 import { GoogleGenAI, Type } from "@google/genai";
-import { Transaction, CreditScore, Insight } from "../types";
+import { Transaction, CreditScore, Insight, TransactionType } from "../types";
 
 const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY || "" });
 
@@ -16,15 +16,17 @@ export async function getFinancialAdvice(
     Total Income: ${insight?.totalIncome || 0}
     Total Expenses: ${insight?.totalExpenses || 0}
     Savings Potential: ${insight?.savingsPotential || 0}
-    Credit Score: ${creditScore?.score || "N/A"} (${creditScore?.explanation || ""})
+    Credit Score: ${creditScore?.score || "N/A"} (${creditScore?.rating || ""})
+    Explanation: ${creditScore?.explanation || ""}
   `;
 
   const systemInstruction = `
     You are a helpful and empathetic financial assistant for mobile money users. 
     Your goal is to provide simple, actionable financial advice based on the user's transaction history and credit score.
     Keep your answers short, clear, and encouraging. 
-    Use terms familiar to mobile money users (e.g., "send", "receive", "paybill").
+    Use terms familiar to mobile money users (e.g., "send", "receive", "paybill", "income", "expense").
     Always prioritize the user's financial well-being.
+    Format your response using Markdown.
   `;
 
   const prompt = `
@@ -53,7 +55,7 @@ export async function parseSmsToTransaction(smsText: string) {
   
   const systemInstruction = `
     You are a specialized parser for mobile money SMS logs. 
-    Extract the amount, type (send, receive, paybill), and date from the SMS.
+    Extract the amount, type (income, expense, send, receive, paybill), category, and date from the SMS.
     Return the data in a structured JSON format.
     If the SMS is not a transaction, return an empty object.
   `;
@@ -62,11 +64,12 @@ export async function parseSmsToTransaction(smsText: string) {
     type: Type.OBJECT,
     properties: {
       amount: { type: Type.NUMBER },
-      type: { type: Type.STRING, enum: ["send", "receive", "paybill"] },
+      type: { type: Type.STRING, enum: Object.values(TransactionType) },
+      category: { type: Type.STRING },
       date: { type: Type.STRING, description: "ISO 8601 format" },
       description: { type: Type.STRING }
     },
-    required: ["amount", "type", "date"]
+    required: ["amount", "type", "category", "date", "description"]
   };
 
   try {
