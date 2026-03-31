@@ -1,0 +1,133 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ===============================================================
+    // Assumed Data Model
+    // ===============================================================
+    //
+    // Collection: users
+    // Document ID: userId (uid)
+    // Fields:
+    //   - uid: string (required)
+    //   - email: string (required, email format)
+    //   - displayName: string (optional)
+    //   - createdAt: string (optional, date-time)
+    //
+    // Collection: transactions
+    // Document ID: transactionId
+    // Fields:
+    //   - uid: string (required)
+    //   - amount: number (required, positive)
+    //   - type: string (required, enum: send, receive, paybill)
+    //   - date: string (required, date-time)
+    //   - description: string (optional)
+    //   - createdAt: string (optional, date-time)
+    //
+    // Collection: credit_scores
+    // Document ID: userId (uid)
+    // Fields:
+    //   - uid: string (required)
+    //   - score: number (required, 0-100)
+    //   - explanation: string (required)
+    //   - updatedAt: string (required, date-time)
+    //
+    // Collection: insights
+    // Document ID: userId (uid)
+    // Fields:
+    //   - uid: string (required)
+    //   - totalIncome: number (required)
+    //   - totalExpenses: number (required)
+    //   - savingsPotential: number (optional)
+    //   - message: string (optional)
+    //   - updatedAt: string (required, date-time)
+    //
+    // ===============================================================
+
+    // ===============================================================
+    // Helper Functions
+    // ===============================================================
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+
+    function isDocOwner() {
+      return isAuthenticated() && request.auth.uid == resource.data.uid;
+    }
+
+    function uidUnchanged() {
+      return !('uid' in request.resource.data) || request.resource.data.uid == request.auth.uid;
+    }
+
+    function uidNotModified() {
+      return !('uid' in request.resource.data) || request.resource.data.uid == resource.data.uid;
+    }
+
+    function hasRequiredFields(fields) {
+      return request.resource.data.keys().hasAll(fields);
+    }
+
+    function isValidEmail(email) {
+      return email is string && email.matches("^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$");
+    }
+
+    // ===============================================================
+    // Domain Validators
+    // ===============================================================
+
+    function isValidUser(data) {
+      return data.uid is string && data.uid.size() > 0 &&
+             isValidEmail(data.email);
+    }
+
+    function isValidTransaction(data) {
+      return data.uid is string && data.uid.size() > 0 &&
+             data.amount is number && data.amount > 0 &&
+             data.type in ['send', 'receive', 'paybill'] &&
+             data.date is string;
+    }
+
+    function isValidCreditScore(data) {
+      return data.uid is string && data.uid.size() > 0 &&
+             data.score is number && data.score >= 0 && data.score <= 100 &&
+             data.explanation is string && data.explanation.size() < 1000;
+    }
+
+    function isValidInsight(data) {
+      return data.uid is string && data.uid.size() > 0 &&
+             data.totalIncome is number &&
+             data.totalExpenses is number;
+    }
+
+    // ===============================================================
+    // Rules
+    // ===============================================================
+
+    match /users/{userId} {
+      allow read: if isOwner(userId);
+      allow create: if isOwner(userId) && isValidUser(request.resource.data);
+      allow update: if isOwner(userId) && isValidUser(request.resource.data) && uidNotModified();
+    }
+
+    match /transactions/{transactionId} {
+      allow read: if isAuthenticated() && (resource == null || resource.data.uid == request.auth.uid);
+      allow create: if isAuthenticated() && request.resource.data.uid == request.auth.uid && isValidTransaction(request.resource.data);
+      allow update: if isAuthenticated() && resource.data.uid == request.auth.uid && request.resource.data.uid == request.auth.uid && isValidTransaction(request.resource.data);
+      allow delete: if isAuthenticated() && resource.data.uid == request.auth.uid;
+    }
+
+    match /credit_scores/{userId} {
+      allow read: if isOwner(userId);
+      allow write: if isOwner(userId) && isValidCreditScore(request.resource.data);
+    }
+
+    match /insights/{userId} {
+      allow read: if isOwner(userId);
+      allow write: if isOwner(userId) && isValidInsight(request.resource.data);
+    }
+  }
+}

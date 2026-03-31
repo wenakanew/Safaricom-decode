@@ -1,0 +1,5 @@
+{
+  "name": "FinAI: AI Financial Assistant",
+  "description": "A mobile-first AI-powered financial assistant for informal users, featuring transaction tracking, spending analysis, credit scoring, and AI-powered chat insights.",
+  "requestFramePermissions": []
+}

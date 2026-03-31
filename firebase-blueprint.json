@@ -1,0 +1,74 @@
+{
+  "entities": {
+    "User": {
+      "title": "User",
+      "description": "User profile information.",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string", "description": "The user's unique ID." },
+        "email": { "type": "string", "format": "email", "description": "The user's email." },
+        "displayName": { "type": "string", "description": "The user's display name." },
+        "createdAt": { "type": "string", "format": "date-time", "description": "When the user was created." }
+      },
+      "required": ["uid", "email"]
+    },
+    "Transaction": {
+      "title": "Transaction",
+      "description": "A financial transaction.",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string", "description": "The user ID who owns this transaction." },
+        "amount": { "type": "number", "description": "The transaction amount." },
+        "type": { "type": "string", "enum": ["send", "receive", "paybill"], "description": "The type of transaction." },
+        "date": { "type": "string", "format": "date-time", "description": "The date of the transaction." },
+        "description": { "type": "string", "description": "Optional description." },
+        "createdAt": { "type": "string", "format": "date-time", "description": "When the record was created." }
+      },
+      "required": ["uid", "amount", "type", "date"]
+    },
+    "CreditScore": {
+      "title": "Credit Score",
+      "description": "User's calculated credit score.",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string", "description": "The user ID." },
+        "score": { "type": "number", "description": "The score from 0 to 100." },
+        "explanation": { "type": "string", "description": "Explanation for the score." },
+        "updatedAt": { "type": "string", "format": "date-time", "description": "When the score was last updated." }
+      },
+      "required": ["uid", "score", "updatedAt"]
+    },
+    "Insight": {
+      "title": "Insight",
+      "description": "Financial insights for the user.",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string", "description": "The user ID." },
+        "totalIncome": { "type": "number", "description": "Total income calculated." },
+        "totalExpenses": { "type": "number", "description": "Total expenses calculated." },
+        "savingsPotential": { "type": "number", "description": "Calculated savings potential." },
+        "message": { "type": "string", "description": "A summary message." },
+        "updatedAt": { "type": "string", "format": "date-time", "description": "When the insight was last updated." }
+      },
+      "required": ["uid", "totalIncome", "totalExpenses", "updatedAt"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": "User",
+      "description": "User profile documents."
+    },
+    "/transactions/{transactionId}": {
+      "schema": "Transaction",
+      "description": "Financial transactions."
+    },
+    "/credit_scores/{userId}": {
+      "schema": "CreditScore",
+      "description": "User credit scores."
+    },
+    "/insights/{userId}": {
+      "schema": "Insight",
+      "description": "User financial insights."
+    }
+  }
+}

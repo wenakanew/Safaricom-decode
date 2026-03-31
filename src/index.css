@@ -1,0 +1,43 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+}
+
+@layer base {
+  body {
+    @apply bg-gray-50 text-gray-900 antialiased;
+  }
+}
+
+@layer utilities {
+  .custom-scrollbar::-webkit-scrollbar {
+    width: 4px;
+  }
+  .custom-scrollbar::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  .custom-scrollbar::-webkit-scrollbar-thumb {
+    @apply bg-gray-200 rounded-full;
+  }
+  .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+    @apply bg-gray-300;
+  }
+}
+
+/* Markdown Styles */
+.prose {
+  @apply text-gray-700 leading-relaxed;
+}
+.prose p {
+  @apply mb-3;
+}
+.prose strong {
+  @apply font-bold text-gray-900;
+}
+.prose ul {
+  @apply list-disc list-inside mb-3;
+}
+.prose li {
+  @apply mb-1;
+}
